@@ -46,7 +46,7 @@
 	}
 	function toggle(startOver=true){
 		speechSynthesis.cancel();
-		if(startOver && msg.text.trim()!==''){
+		if(startOver){
 			speechSynthesis.speak(msg);
 		}
 	}
