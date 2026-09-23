@@ -30,7 +30,6 @@
 
 <script>
   const msg = new SpeechSynthesisUtterance();
-
 let voices = [];
 
 const voicesDropdown = document.querySelector('[name="voice"]');
@@ -41,12 +40,13 @@ const textArea = document.querySelector('[name="text"]');
 const rateSlider = document.querySelector('[name="rate"]');
 const pitchSlider = document.querySelector('[name="pitch"]');
 
-msg.text = textArea.value;
-msg.rate = rateSlider.value;
-msg.pitch = pitchSlider.value;
-
 function populateVoices() {
   voices = speechSynthesis.getVoices();
+  
+  if (voices.length === 0) {
+    voicesDropdown.innerHTML = '<option value="">No voices available</option>';
+    return;
+  }
 
   voicesDropdown.innerHTML = voices
     .map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`)
@@ -60,12 +60,14 @@ function setVoice() {
 
 function toggle(startOver = true) {
   speechSynthesis.cancel();
+  
+  // Prevent speech synthesis if input text is empty
+  if (!textArea.value.trim()) return;
 
   if (startOver) {
     msg.text = textArea.value;
     msg.rate = parseFloat(rateSlider.value);
     msg.pitch = parseFloat(pitchSlider.value);
-
     speechSynthesis.speak(msg);
   }
 }
@@ -74,28 +76,19 @@ function setOption() {
   if (this.name === 'text') {
     msg.text = this.value;
   }
-
   if (this.name === 'rate') {
     msg.rate = parseFloat(this.value);
   }
-
   if (this.name === 'pitch') {
     msg.pitch = parseFloat(this.value);
   }
-
   toggle();
 }
 
 speechSynthesis.addEventListener('voiceschanged', populateVoices);
-
 voicesDropdown.addEventListener('change', setVoice);
-
-options.forEach(option => {
-  option.addEventListener('change', setOption);
-});
-
+options.forEach(option => option.addEventListener('change', setOption));
 speakButton.addEventListener('click', () => toggle(true));
-
 stopButton.addEventListener('click', () => toggle(false));
 
 populateVoices();
